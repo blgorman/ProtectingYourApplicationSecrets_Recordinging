@@ -1,3 +1,4 @@
+using Azure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MVCProtectingSecrets.Data;
@@ -12,6 +13,19 @@ namespace MVCProtectingSecrets
             builder.Services.AddHttpClient();
 
             //TODO: Add the Azure App Configuration code here.
+            var appConfigConnection = builder.Configuration.GetConnectionString("AzureAppConfigConnection");
+
+            builder.Host.ConfigureAppConfiguration((hostingContext, config) =>
+            {
+                config.AddAzureAppConfiguration(options =>
+                {
+                    options.Connect(appConfigConnection);
+                    options.ConfigureKeyVault(options =>
+                    {
+                        options.SetCredential(new DefaultAzureCredential());
+                    });
+                });
+            });
 
 
             // Add services to the container.
